@@ -1,0 +1,33 @@
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+
+	dependencies {
+		classpath 'org.liquibase:liquibase-core:3.8.9'
+		classpath "org.liquibase:liquibase-gradle-plugin:1.2.4"
+		classpath 'mysql:mysql-connector-java:8.0.18'
+		classpath 'org.yaml:snakeyaml:1.26'
+	}
+
+	configurations {
+		liquibaseRuntime.extendsFrom runtime
+	}
+}
+
+apply plugin: 'liquibase'
+
+def changeLog = "config/db.changelog-master.yaml"
+project.ext.env = project.ext.hasProperty('env') ? project.ext.env : 'dev'
+
+liquibase {
+	activities {
+		dev {
+			changeLogFile changeLog
+			url 'jdbc:mysql://localhost:3306/foo_test?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf-8'
+			username 'root'
+			password 'root'
+		}
+		runList = "$env".isEmpty() ? "dev" : "$env"
+	}
+}
